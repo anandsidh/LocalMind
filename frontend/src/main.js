@@ -141,14 +141,17 @@ function loadPanelState() {
   try {
     const saved = JSON.parse(localStorage.getItem('localmind-panels') || '{}');
     const shell = document.querySelector('.shell');
+    const studio = document.querySelector('.studio');
+
     if (!shell) return;
+
     shell.classList.toggle('sidebar-hidden', saved.sidebar === true);
-    document.querySelector('.studio')?.classList.toggle('explorer-hidden', saved.explorer === true);
-    document.querySelector('.studio')?.classList.toggle('agent-hidden', saved.agent === true);
+    studio?.classList.toggle('explorer-hidden', saved.explorer === true);
+    studio?.classList.toggle('agent-hidden', saved.agent === true);
+
     updatePanelButtons();
   } catch {}
 }
-
 function savePanelState() {
   const shell = document.querySelector('.shell');
   const studio = document.querySelector('.studio');
@@ -206,7 +209,27 @@ function bindPanelToggles() {
   loadPanelState();
 }
 
-function show(view) { document.querySelectorAll('.view').forEach(x => x.classList.add('hidden')); document.querySelector(`#${view}View`).classList.remove('hidden'); document.querySelectorAll('.nav').forEach(x => x.classList.toggle('active', x.dataset.view === view)); if (view === 'editor') { initEditor(); loadPanelState(); } }
+function show(view) {
+  document.querySelectorAll('.view').forEach(x => x.classList.add('hidden'));
+  document.querySelector(`#${view}View`).classList.remove('hidden');
+
+  document.querySelectorAll('.nav').forEach(x =>
+    x.classList.toggle('active', x.dataset.view === view)
+  );
+
+  const shell = document.querySelector('.shell');
+  const studio = document.querySelector('.studio');
+
+  if (view === 'home' || view === 'ai') {
+    // Always show the main sidebar outside Code Studio
+    shell?.classList.remove('sidebar-hidden');
+  }
+
+  if (view === 'editor') {
+    initEditor();
+    loadPanelState();
+  }
+}
 document.querySelectorAll('.nav').forEach(x => (x.onclick = () => show(x.dataset.view))); document.querySelectorAll('[data-open]').forEach(x => (x.onclick = () => show(x.dataset.open)));
 
 const languageToExtension = { python: 'py', javascript: 'js', c: 'c', cpp: 'cpp', java: 'java' };
